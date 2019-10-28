@@ -15,5 +15,3 @@ app.get('/test', (req, res) => res.send('hello world'))
 app.use(bodyParserMiddleWare)
 app.use(UserRouter)
 
-
-//
