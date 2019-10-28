@@ -1,4 +1,3 @@
-
 const Express = require('express')
 const app = Express()
 
@@ -8,6 +7,7 @@ const bodyParserMiddleWare = bodyParser.json()
 
 const db = require('./db')
 const UserRouter = require('./user/router');
+const UserLogin = require('./login/auth/router')
 
 
 const port = process.env.PORT || 4000
@@ -18,4 +18,5 @@ app.get('/test', (req, res) => res.send('hello world'))
 
 app.use(bodyParserMiddleWare)
 app.use(UserRouter)
+app.use(UserLogin)
 

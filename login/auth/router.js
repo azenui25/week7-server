@@ -1,6 +1,7 @@
 const { Router } = require('express')
 const { toJWT, toData } = require('./jwt')
-
+const User = require('../../user/model')
+const bcrypt = require('bcrypt')
 const router = new Router()
 
 // define endpoints here
@@ -9,8 +10,7 @@ router.post('/login', (req, res) => {
         return res.status(400).send({ message: 'Please give me some credentials, stranger' })
     }
     else {
-      User
-  .findOne({
+      User.findOne({
     where: {
       email: req.body.email
     }
