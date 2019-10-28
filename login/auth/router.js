@@ -8,35 +8,39 @@ router.post('/login', (req, res) => {
     if(!req.body.email || !req.body.password){
         return res.status(400).send({ message: 'Please give me some credentials, stranger' })
     }
-
-    return res.send({
-        jwt: toJWT({ userId: 1 })
-    })
-})
-
-router.get('/secret-endpoint',auth, (req, res) => {
-    console.log('WHAT IS REQ.HEADERS.AUTHORIZATIOn', req.headers.authorization)
-    // do we have req.headers.authorization && if so: split the header on a space
-    const auth = req.headers.authorization && req.headers.authorization.split(' ')
-    console.log('SPLIT:', auth)
-
-    // is auth something && is the first element a string "Bearer" && do we have a token
-    if (auth && auth[0] === 'Bearer' && auth[1]) {
-      // verify the token and get me the information inside (toData(auth[1]))
-      const data = toData(auth[1])
+    else {
+      User
+  .findOne({
+    where: {
+      email: req.body.email
+    }
+  })
+  .then(entity => {
+    if (!entity) {
+      res.status(400).send({
+        message: 'User with that email does not exist'
+      })
+    }
+    else if (bcrypt.compareSync(req.body.password, entity.password)) {
       res.send({
-        message: 'Thanks for visiting the secret endpoint.',
-        data
+        jwt: toJWT({ userId: entity.id })
       })
     }
     else {
-      res.status(401).send({
-        message: 'Please supply some valid credentials'
+      res.status(400).send({
+        message: 'Password was incorrect'
       })
     }
-})
-
-
+  })
+  .catch(err => {
+    console.error(err)
+    res.status(500).send({
+      message: 'Something went wrong'
+    })
+  })
+}})
+    
+    
 
 
 module.exports = router
