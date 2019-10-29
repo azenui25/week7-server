@@ -51,7 +51,7 @@ router.put('/lobby/:lobbyId', (req,res) => {
 
         else if (lobby.player1==null){
             lobby.update({
-                player1 : req.body.player1,
+                player1 : req.body.player,
                 status : 'waiting'
             })
             .then(lobby => res.send(lobby))
@@ -59,7 +59,7 @@ router.put('/lobby/:lobbyId', (req,res) => {
 
         else if (lobby.player2==null){
             lobby.update({
-                player2 : req.body.player2,
+                player2 : req.body.player,
                 status : 'FULL'
         })
             .then(lobby => res.send(lobby))
