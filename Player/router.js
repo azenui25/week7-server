@@ -21,11 +21,11 @@ router.get('/player', (req, res, next) => {
 //Post the players for available lobby id only 
 //************************************** // 
 router.post('/player/:lobbyId', async (req, res) => {
-  //let score=0;
   
   let randomNumber = Math.floor((Math.random() * 6) + 1);
-  console.log("random number value: ", randomNumber)     //between the range 1 to 6
+  //console.log("random number value: ", randomNumber)     //between the range 1 to 6
   // Lobby.findByPk(req.params.lobbyId).then(lobby => {
+  
   const lobby = await Lobby.findByPk(req.params.lobbyId, { includes: [Player] })
   const turn = lobby.turn
 
@@ -37,7 +37,7 @@ if(lobby.status==='FULL'){
   console.log("player1: ", player1)
   console.log("player2: ", player2)
   console.log("value of count : ", lobby.count)
-    if(lobby.count < 4){
+    if(lobby.count < 8){
         if(turn==1){
           //score=randomNumber
           //console.log("score of player1: ", score)
@@ -86,7 +86,7 @@ if(lobby.status==='FULL'){
         .catch(err => console.log(err))  }
     else{
       res
-        .status(201)
+        .status(200)
         .send({message : "game is over, see your result :)"})
         .catch(err => console.log(err))
     }
@@ -96,49 +96,63 @@ if(lobby.status==='FULL'){
 
 //get the total scores of players 
 //************************************** // 
-// still working on that 
-//************************************** //
-
 
 router.get('/result/:lobbyId', async (req, res, next) => {
   const lobby = await Lobby.findByPk(req.params.lobbyId, { includes: [Player] })
+
   const player1=lobby.player1
   console.log("player1 : ", player1)
   const player2=lobby.player2
 
   const ScoreOfPlayer1 = await Player.findAll(
-    //{
-   // 
-   
     {
     where :{
       LobbyId : req.params.lobbyId,
       player : player1
     },
-    attributes: [
-      [Sequelize.fn('sum', Sequelize.col('score')),'total'],
-      [Sequelize.fn('min', Sequelize.col('score')),'total22']
+    attributes: [[Sequelize.fn('sum', Sequelize.col('score')),'total']
+      //[Sequelize.fn('min', Sequelize.col('score')),'total22']
     ]
+  })
+  //console.log("total score of player1 : ", ScoreOfPlayer1[0].dataValues.total)
+  let score1 = ScoreOfPlayer1[0].dataValues.total
+  console.log("score of player1 : ", score1)
+
+  const ScoreOfPlayer2 = await Player.findAll(
+    {
+    where :{
+      LobbyId : req.params.lobbyId,
+      player : player2
+    },
+    attributes: [[Sequelize.fn('sum', Sequelize.col('score')),'total']]
+  })
+  //console.log("total score of player2 : ", ScoreOfPlayer2[0].dataValues.total)
+  let score2 = ScoreOfPlayer2[0].dataValues.total
+  console.log("score of player2 : ", score2)
+
+   if (score1 == score2) {
+    console.log("Oh, Both players have same scores :)")
+    res.status(200)
+    res.send({message: "Oh, Both players have same scores :)"})
+   }
+    if(score1 > score2){
+     console.log(`Hurry ${player1} is winner`)
+     res.status(200)
+    res.send({message: `Hurry ${player1} is winner`})
+   }
+  else {
+    console.log(`Hurry ${player2} is winner`)
+    res.status(200)
+    res.send({message : `Hurry ${player2} is winner`})
   }
-
- 
-    
-
-  )
-  console.log("total score of player1 : ", ScoreOfPlayer1[0])
-    
   
-  // .then(player => {
+
+  // .then(player => 
   //     res
   //     .status(200)
   //     .send(player);
   //   })
   //   .catch(next);
 })
-
-// const ScoreOfPlayer2 = await Player.findAll({})
-
-;
-
 
 module.exports = router
