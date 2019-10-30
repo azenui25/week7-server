@@ -27,39 +27,43 @@ router.post('/lobby', (req,res) => {
     console.log("create lobby")
     Lobby.create({
         lobbyName : req.body.lobbyName,
-        status :  req.body.status
+        status :  'FREE',
+        count : 0
         })
         .then(lobby => {
             res
             .status(201)
             .send({message: "Lobby created sucessfully"})
+        })
     .catch(err => next(err))
-})
+
 })
 
 //Update the information of Player1 and Player2
+
 
 router.put('/lobby/:lobbyId', (req,res) => {
     console.log("update the player1 and palyer2 in lobby table")
     Lobby.findByPk(req.params.lobbyId)
     .then(lobby     => {
-        console.log("lobby found", lobby);
+        //console.log("lobby found", lobby);
         if (lobby.status=='FULL') {
-            console.log("room is full, try another room")
+            //console.log("room is full, try another room")
             res.send({message: "lobby is full, please try another room :) "}).end();
         }
 
         else if (lobby.player1==null){
             lobby.update({
-                player1 : req.body.player1,
-                status : 'waiting'
+                player1 : req.body.player,
+                status : 'WAITING',
+                turn: 1
             })
             .then(lobby => res.send(lobby))
         }
 
         else if (lobby.player2==null){
             lobby.update({
-                player2 : req.body.player2,
+                player2 : req.body.player,
                 status : 'FULL'
         })
             .then(lobby => res.send(lobby))

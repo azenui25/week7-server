@@ -7,11 +7,13 @@ const bodyParser = require('body-parser')
 const bodyParserMiddleWare = bodyParser.json()
 
 const db = require('./db')
+const middleware = cors()
 
 //routers 
 const UserRouter = require('./user/router');
 const UserLogin = require('./login/auth/router')
 const LobbyRouter = require('./Lobby/router')
+const PlayerRouter = require('./Player/router')
 
 
 const port = process.env.PORT || 4000
@@ -26,5 +28,6 @@ app.use(bodyParserMiddleWare)
 app.use(UserRouter)
 app.use(UserLogin)
 app.use(LobbyRouter)
+app.use(PlayerRouter)
 
 
