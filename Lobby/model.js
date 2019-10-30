@@ -1,18 +1,19 @@
 const Sequelize = require('sequelize');
 const db = require('../db')
-const Game = require('../Game/model')
+const Player = require('../Player/model')
 
 
 const Lobby = db.define('Lobby',{
-       lobbyName : Sequelize.STRING,
+        lobbyName : Sequelize.STRING,
         player1: Sequelize.STRING,
         player2: Sequelize.STRING,
+        turn: Sequelize.INTEGER,
+        count : Sequelize.INTEGER,
         status : Sequelize.STRING
-        
-       
     })
 
-Lobby.hasMany(Game)
-Game.belongsTo(Lobby)
+Lobby.hasMany(Player)
+Player.belongsTo(Lobby)
+
 
 module.exports = Lobby
