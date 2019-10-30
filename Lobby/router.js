@@ -23,7 +23,7 @@ router.get('/lobby', (req, res, next) => {
   });
 
 // Create lobby with lobbyName and status
-router.post('/lobby', (req,res) => {
+router.post('/lobby', (req,res, next) => {
     console.log("create lobby")
     Lobby.create({
         lobbyName : req.body.lobbyName,
