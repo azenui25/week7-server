@@ -14,18 +14,21 @@ router.get('/user', (req, res, next) => {
 });
 
 
-router.post('/user', (req, res) => {
+router.post('/user', async (req, res, next) => {
   console.log("create user")
-  User.create({
-    email: req.body.email,
-    password: bcrypt.hashSync(req.body.password, 10)
-  })
-    .then(user => {
-      res
-        .status(201)
-        .send({ message: "user created sucessfully" })
+  try {
+    const user = await User.create({
+        email: req.body.email,
+        password :  bcrypt.hashSync(req.body.password, 10)
     })
-    .catch(err => next(err))
+
+    res
+      .status(201)
+      .send(user)
+      .catch(err => next(err))
+  } catch (error) {
+    next(error)
+  }
 
 })
 
