@@ -35,6 +35,7 @@ router.post('/lobby', async (req, res, next) => {
             lobbyName: req.body.lobbyName,
             status:  'FREE',
             count: 0
+
         })
 
         await sendToClients()
