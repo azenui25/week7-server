@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const db = require('../db')
-const User = require('../Player/model')
+const User = require('../user/model')
 
 const Lobby = db.define('Lobby',{
     lobbyName : Sequelize.STRING,

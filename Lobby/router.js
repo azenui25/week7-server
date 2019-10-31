@@ -2,27 +2,31 @@ const { Router } = require("express");
 const Lobby = require("./model");
 const User = require('../user/model')
 const auth = require('../auth/middleware')
+const Sse = require('json-sse')
+
+const stream = new Sse()
+
+async function getAllData () {
+    const lobbies = await Lobby.findAll({ include: [User] })
+
+    return JSON.stringify(lobbies)
+}
+
+async function sendToClients () {
+    const data = await getAllData()
+
+    stream.send(data)
+}
 
 const router = new Router();
 
-//get information of all rooms available in lobby
-router.get('/lobby', (req, res, next) => {
-    Lobby.findAll()
-      .then(lobby => {
-        res.send(lobby);
-      })
-      .catch(next);
-  });
+router.get('/stream', async (req, res) => {
+    console.log('stream test')
+    const data = await getAllData()
 
-
-// get information of room thru id
-  router.get('/lobby/:id', (req, res, next) => {
-    Lobby.findByPk(req.params.id)
-      .then(lobby => {
-        res.send(lobby);
-      })
-      .catch(next);
-  });
+    stream.updateInit(data)
+    stream.init(req, res)
+})
 
 // Create lobby with lobbyName and status
 router.post('/lobby', async (req, res, next) => {
@@ -34,6 +38,8 @@ router.post('/lobby', async (req, res, next) => {
 
         })
 
+        await sendToClients()
+
         res
             .status(201)
             .send(lobby)
@@ -44,6 +50,31 @@ router.post('/lobby', async (req, res, next) => {
 
 //Update the information of Player1 and Player2
 
+router.put('/lobby/:lobbyId/start', auth, async (req, res, next) => {
+    try {
+      const lobby = await Lobby.findByPk(req.params.lobbyId, { include: [User] })
+  
+      console.log("lobby found ??", lobby.id)
+  
+      if (lobby.status !== 'FULL') {
+        return res.send({ message: 'This game is waiting for more players' })
+      }
+    
+      if (lobby.count !== 0) {
+        res.status(200)
+        return res.send({ message : "game has already started" })
+      }
+  
+      const updated = await lobby.update({ turn: req.user.id, count: 1 })
+
+      await sendToClients()
+  
+      res.status(200)
+      res.send(updated).end()
+    } catch (err){
+      next(err)
+    }
+  })
 
 router.put('/lobby/:lobbyId/join', auth, async (req, res, next) => {
     console.log("update the player1 and palyer2 in lobby table")
@@ -60,6 +91,8 @@ router.put('/lobby/:lobbyId/join', auth, async (req, res, next) => {
         }
 
         const updated = await user.update({ lobbyId })
+
+        await sendToClients()
 
         res.send(updated)
     } catch (error) {

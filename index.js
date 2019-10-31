@@ -13,7 +13,6 @@ const middleware = cors()
 const UserRouter = require('./user/router');
 const UserLogin = require('./auth/router')
 const LobbyRouter = require('./Lobby/router')
-const PlayerRouter = require('./Player/router')
 
 
 const port = process.env.PORT || 4000
@@ -28,6 +27,5 @@ app.use(bodyParserMiddleWare)
 app.use(UserRouter)
 app.use(UserLogin)
 app.use(LobbyRouter)
-app.use(PlayerRouter)
 
 

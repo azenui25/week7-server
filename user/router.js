@@ -4,16 +4,6 @@ const bcrypt = require('bcrypt')
 
 const router = new Router();
 
-
-router.get('/user', (req, res, next) => {
-  User.findAll()
-    .then(user => {
-      res.send(user);
-    })
-    .catch(next);
-});
-
-
 router.post('/user', async (req, res, next) => {
   console.log("create user")
   try {
