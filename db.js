@@ -8,6 +8,7 @@ const db = new Sequelize(databaseUrl)
 
 db
   .sync({ force: false })
+  // .sync()
   .then(() => console.log('Database schema updated'))
   .catch(console.error)
 

@@ -6,12 +6,12 @@ const router = new Router();
 
 
 router.get('/user', (req, res, next) => {
-    User.findAll()
-      .then(user => {
-        res.send(user);
-      })
-      .catch(next);
-  });
+  User.findAll()
+    .then(user => {
+      res.send(user);
+    })
+    .catch(next);
+});
 
 
 router.post('/user', async (req, res, next) => {
@@ -29,6 +29,7 @@ router.post('/user', async (req, res, next) => {
   } catch (error) {
     next(error)
   }
+
 })
 
 module.exports = router
