@@ -50,7 +50,7 @@ router.post('/lobby', async (req, res, next) => {
 
 //Update the information of Player1 and Player2
 
-router.put('/lobby/:lobbyId/start', auth, async (req, res, next) => {
+router.put('/start/:lobbyId', auth, async (req, res, next) => {
     try {
       const lobby = await Lobby.findByPk(req.params.lobbyId, { include: [User] })
   
@@ -76,7 +76,7 @@ router.put('/lobby/:lobbyId/start', auth, async (req, res, next) => {
     }
   })
 
-router.put('/lobby/:lobbyId/join', auth, async (req, res, next) => {
+router.put('/join/:lobbyId', auth, async (req, res, next) => {
     console.log("update the player1 and palyer2 in lobby table")
     const { user } = req
     const { lobbyId } = req.params
