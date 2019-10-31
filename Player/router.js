@@ -1,7 +1,8 @@
 const Sequelize = require('sequelize');
 const { Router } = require("express");
-const Player = require("./model");
+const User = require("../User/model");
 const Lobby = require('../Lobby/model')
+const auth = require('../auth/middleware')
 
 const router = new Router();
 
@@ -19,125 +20,38 @@ router.get('/player', (req, res, next) => {
 
 //Put the players for available lobby id only 
 //******************************************** // 
-router.put('/player/:lobbyId', async (req, res, next) => {
-  
-  let randomNumber = Math.floor((Math.random() * 6) + 1);
-
-  try{
-    const lobby = await Lobby.findByPk(req.params.lobbyId, { include: [Player] })
+router.put('/player/:lobbyId/start', auth, async (req, res, next) => {
+  try {
+    const lobby = await Lobby.findByPk(req.params.lobbyId, { include: [User] })
 
     console.log("lobby found ??", lobby.id)
-    const player1=lobby.player1
-    const player2=lobby.player2  
 
-    if(lobby.status==='FULL'){
-        console.log("value of turn : ", lobby.turn)
-        console.log("player1: ", player1)
-        console.log("player2: ", player2)
-        console.log("value of count : ", lobby.count)
+    if (lobby.status !== 'FULL') {
+      return res.send({ message: 'This game is waiting for more players' })
+    }
+  
+    if (lobby.count !== 0) {
+      res.status(200)
+      return res.send({ message : "game has already started" })
+    }
 
-        if(lobby.count < 8){
-            if(lobby.turn==1){
-              score=randomNumber
-              console.log("score of player1: ", score)
-              try {
-                  
-                const player = await Player.create({
-                    player1: player1,
-                    player2: player2,
-                    score1 : randomNumber,
-                    score2 : 0,
-                    LobbyId: req.params.lobbyId
-                    },
-                    {
-                        where: {LobbyId : req.params.lobbyId}
-                    }
-                    )
-                    res.status(200)
-                    res.send(player).end()
+    const updated = await lobby.update({ turn: req.user.id, count: 1 })
 
-              } 
-              
-
-              
-              catch (err){
-                  console.log(err, req.body)
-              }
-                
-               try{
-                const updated = await Lobby.update(
-                    {
-                      turn: 2,
-                      count: lobby.count + 1
-                    },
-                    {
-                      where: {
-                        id: req.params.lobbyId
-                      }
-                    }
-                  )
-                  res.status(200)
-                  res.send(updated).end()
-
-               } catch(err){
-                   console.log(err, req.body)
-               }
-            }
-                
-              else{
-         
-                try{
-                    const player = await Player.create({
-                        player1: player1,
-                        player2: player2,
-                        score1 : 0,
-                        score2 : randomNumber,
-                        LobbyId: req.params.lobbyId
-                      },
-                      {
-                          where: {LobbyId : req.params.lobbyId}
-                      })
-                      res.status(200)
-                      res.send(player).end()
-                } catch(err){
-                    console.log(err, req.body)
-                }
-                
-                try{
-                    const updated = await Lobby.update(
-                        {
-                          turn: 1,
-                          count: lobby.count+1
-                        },
-                        {
-                          where: {
-                            id: req.params.lobbyId
-                          }
-                        }
-                      )
-                      res.status(200)
-                      res.send(updated).end()
-
-
-                } catch(err){
-                    console.log(err, req.body)
-                }
-               
-                 } 
-                 
-               }
-        else {
-            res.status(200)
-            res.send({message : "game is over, see your total scores :)"})
-        }
-            }
-       
-  }
-
-  catch (err){
-      console.log(err, req.body)
+    res.status(200)
+    res.send(updated).end()
+  } catch (err){
+    next(err)
   }
 })
+
+router.put('/player/:lobbyId/move', async (req, res, next) => {
+  let randomNumber = Math.floor((Math.random() * 6) + 1);
+
+  // First, update the player score
+
+  // Second, update the game turn
+})
+
 
 //get the total scores of players 
 //************************************** // 

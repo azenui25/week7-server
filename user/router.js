@@ -14,18 +14,21 @@ router.get('/user', (req, res, next) => {
   });
 
 
-router.post('/user', (req,res) => {
-    console.log("create user")
-    User.create({
+router.post('/user', async (req, res, next) => {
+  console.log("create user")
+  try {
+    const user = await User.create({
         email: req.body.email,
         password :  bcrypt.hashSync(req.body.password, 10)
     })
-.then(user => {
+
     res
-    .status(201)
-    .send({message: "user created sucessfully"})
-.catch(err => next(err))
-})
+      .status(201)
+      .send(user)
+      .catch(err => next(err))
+  } catch (error) {
+    next(error)
+  }
 })
 
 module.exports = router

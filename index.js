@@ -11,7 +11,7 @@ const middleware = cors()
 
 //routers 
 const UserRouter = require('./user/router');
-const UserLogin = require('./login/auth/router')
+const UserLogin = require('./auth/router')
 const LobbyRouter = require('./Lobby/router')
 const PlayerRouter = require('./Player/router')
 
