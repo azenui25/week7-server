@@ -2,12 +2,16 @@ const User = require('../user/model')
 const { toData } = require('./jwt')
 
 function auth(req, res, next) {
+  console.log("req header : ", req.headers)
   const auth = req.headers.authorization && req.headers.authorization.split(' ')
+  
+  console.log("auth", auth)
+
   if (auth && auth[0] === 'Bearer' && auth[1]) {
     try {
       const data = toData(auth[1])
       User
-        .findByPk(data.userId)
+        .findByPk(data.userId)  
         .then(user => {
           if (!user) return next('User does not exist')
 
@@ -17,6 +21,7 @@ function auth(req, res, next) {
         .catch(next)
     }
     catch (error) {
+      console.log("error : ", error)
       res.status(400).send({
         message: `Error ${error.name}: ${error.message}`,
       })
