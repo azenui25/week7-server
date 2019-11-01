@@ -24,13 +24,14 @@ const router = new Router();
 router.get('/stream', async (req, res) => {
     console.log('stream test')
     const data = await getAllData()
+    
 
     stream.updateInit(data)
     stream.init(req, res)
 })
 
 // Create lobby with lobbyName and status
-router.post('/lobby', async (req, res, next) => {
+router.post('/lobby', auth, async (req, res, next) => {
     try {
         const lobby = await Lobby.create({
             lobbyName: req.body.lobbyName,
@@ -49,7 +50,33 @@ router.post('/lobby', async (req, res, next) => {
     }
 })
 
-//Update the information of Player1 and Player2
+//update the lobby id in user table
+
+router.put('/lobby/:lobbyId/join', auth, async (req, res, next) => {
+    console.log("update thle lobbyID the User table")
+    const { user } = req
+    const { lobbyId } = req.params
+
+    try {
+        const lobby = await Lobby.findByPk(lobbyId)
+
+        //console.log("lobby found", lobby);
+        if (lobby.status === 'FULL') {
+            //console.log("room is full, try another room")
+            return res.send({message: "lobby is full, please try another room :) "})
+        }
+        const updated = await user.update({ lobbyId })
+
+        await sendToClients()
+
+        res.send(updated)
+    } catch (error) {
+        console.log("error :", error)
+        next(error)
+    }
+})
+
+//update the turn and count of the number of users in the lobby table
 
 router.put('/start/:lobbyId', auth, async (req, res, next) => {
     try {
@@ -77,7 +104,12 @@ router.put('/start/:lobbyId', auth, async (req, res, next) => {
     }
   })
 
-router.put('/lobby/:lobbyId/join', auth, async (req, res, next) => {
+
+// generate the random number and add this random number to user score
+//update turn value in lobby table with user id
+
+router.put('/playGame', auth, async (req, res, next) => {
+
     console.log("update the player1 and palyer2 in lobby table")
     const { lobbyId } = req.params
 
@@ -95,15 +127,25 @@ router.put('/lobby/:lobbyId/join', auth, async (req, res, next) => {
         const lobby = await Lobby.findByPk(Number(lobbyId))
 
         //console.log("lobby found", lobby);
+
         if (lobby.status === 'FULL') {
             //console.log("room is full, try another room")
             return res.send({message: "lobby is full, please try another room :) "})
         }
+
         player = await User.findAll({ where: {
             id: requestMaker.userId
           }})
           console.log("myPlayer is", player[0])
         const updated = await player[0].update({ LobbyId: lobbyId})//lobbyId })
+
+
+
+        //const updated = await user.update({ score})
+            
+            //  let randomNumber = Math.floor((Math.random() * 6) + 1);
+            // score = randomNumber
+            
 
         await sendToClients()
 
