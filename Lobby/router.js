@@ -3,6 +3,7 @@ const Lobby = require("./model");
 const User = require('../user/model')
 const auth = require('../auth/middleware')
 const Sse = require('json-sse')
+const {toData} = require('../auth/jwt')
 
 const stream = new Sse()
 
@@ -76,21 +77,33 @@ router.put('/start/:lobbyId', auth, async (req, res, next) => {
     }
   })
 
-router.put('/join/:lobbyId', auth, async (req, res, next) => {
+router.put('/lobby/:lobbyId/join', auth, async (req, res, next) => {
     console.log("update the player1 and palyer2 in lobby table")
-    const { user } = req
     const { lobbyId } = req.params
 
+    const BearerPlusTokenInArray = req.headers.authorization && req.headers.authorization.split(' ')
+    //BearerPlusTokenInArray[0] = 'Bearer'
+    //BearerPlusTokenInArray[1] = '657689hgdehfkjhjflkdfst7sdsd6s78d' //jwt
+
+
+
+    requestMaker = toData(BearerPlusTokenInArray[1])
+
+    console.log("id2",myUserID)
+
     try {
-        const lobby = await Lobby.findByPk(lobbyId)
+        const lobby = await Lobby.findByPk(Number(lobbyId))
 
         //console.log("lobby found", lobby);
         if (lobby.status === 'FULL') {
             //console.log("room is full, try another room")
             return res.send({message: "lobby is full, please try another room :) "})
         }
-
-        const updated = await user.update({ lobbyId })
+        player = await User.findAll({ where: {
+            id: requestMaker.userId
+          }})
+          console.log("myPlayer is", player[0])
+        const updated = await player[0].update({ LobbyId: lobbyId})//lobbyId })
 
         await sendToClients()
 
